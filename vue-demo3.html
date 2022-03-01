@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$方法与property的区别</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+<div id="example">
+    <p>Original message: "{{ message }}"</p>
+    <p>Computed reversed message: "{{ reversedMessage }}"</p>
+    <p>Reversed message: "{{ reversedMessages() }}"</p>
+    <my-component class="baz boo"></my-component>
+    <template v-if=loginType==="username">
+        <label>Username</label>
+        <input placeholder="Enter your username">
+    </template>
+    <template v-else>
+        <label>Email</label>
+        <input placeholder="Enter your email address">
+    </template>
+    <button @click="changeIpt"> 改变</button>
+    <div id="todo-list-example">
+        <form v-on:submit.prevent="addNewTodo">
+            <label for="new-todo">Add a todo</label>
+            <input v-model="newTodoText" id="new-todo" placeholder="E.g. Feed the cat">
+            <button>Add</button>
+        </form>
+        <ul>
+            <li is="todo-item" v-for="(todo, index) in todos" v-bind:key="todo.id" v-bind:title="todo.title"
+                v-on:remove="todos.splice(index, 1)"></li>
+        </ul>
+    </div>
+</div>
+
+<body>
+
+</body>
+<script>
+    var data = { a: 1 }
+    Vue.component('my-component', {
+        template: "<p class='foo bar'>Hi</p>"
+    })
+    Vue.component('todo-item', {
+        template: '\
+    <li>\
+      {{ title }}\
+      <button v-on:click="$emit(\'remove\')">Remove</button>\
+    </li>\
+  ',
+        props: ['title']
+    })
+    var vm = new Vue({
+
+        el: '#example',
+        data: {
+            a: 223423,
+            message: 'Hello',
+            loginType: "username",
+            newTodoText: '',
+            todos: [
+                {
+                    id: 1,
+                    title: 'Do the dishes',
+                },
+                {
+                    id: 2,
+                    title: 'Take out the trash',
+                },
+                {
+                    id: 3,
+                    title: 'Mow the lawn'
+                }
+            ],
+            nextTodoId: 4
+        },
+        computed: {
+            // 计算属性的  getter
+            reversedMessage: function () {
+                // `this` 指向 vm 实例
+                return this.message.split('').reverse().join('')
+            }
+        },
+        methods: {
+            text: function () {
+                console.log("测试")
+            },
+            reversedMessages: function () {
+                console.log("23132")
+            },
+            changeIpt: function () {
+
+                this.loginType = this.loginType === "username" ? "phone" : 'username'
+            },
+            addNewTodo: function () {
+                this.todos.push({
+                    id: this.nextTodoId++,
+                    title: this.newTodoText
+                })
+                this.newTodoText = ''
+            }
+
+        },
+        // 不要在选项 property 或回调上使用箭头函数，因为箭头函数没有this
+        beforeCreate: function () {
+            console.log("a is:" + this.a)
+
+            console.log("当前的方法未挂载 + 当前的数据未赋值")
+        },
+        created: function () {
+            console.log("初始化数据和方法")
+            console.log("a is:" + this.a)
+            console.log()
+            this.text()
+        },
+        beforeMount: function () {
+
+        },
+        mounted: function () {
+            this.text()
+        },
+
+    })
+
+
+    vm.$data === data // => true
+    vm.$el === document.getElementById('example') // => true
+
+    // $watch 是一个实例方法
+    vm.$watch('a', function (newValue, oldValue) {
+        // 这个回调将在 `vm.a` 改变后调用
+        console.log(newValue, oldValue)
+    })
+
+</script>
+
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组件过渡动画</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
+</head>
+
+<body>
+    <div id="demo">
+        <button v-on:click="show = !show">
+            Toggle
+        </button>
+        <transition name="fade">
+            <p v-if="show">hello</p>
+        </transition>
+
+        <button @click="showOne = !showOne">
+            Toggle render
+        </button>
+        <transition name="slide-fade">
+            <p v-if="showOne">hello</p>
+        </transition>
+        <div id="example-2">
+            <button @click="showTwo = !showTwo">Toggle show</button>
+            <transition name="bounce">
+                <p v-if="showTwo">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris facilisis enim libero,
+                    at lacinia diam fermentum id. Pellentesque habitant morbi tristique senectus et netus.</p>
+            </transition>
+        </div>
+        <div id="example-3">
+            <button @click="showThree = !showThree">
+                Toggle render
+            </button>
+            <transition name="custom-classes-transition" enter-active-class="animated tada"
+                leave-active-class="animated bounceOutRight">
+                <p v-if="showThree">hello</p>
+            </transition>
+        </div>
+        <div id="example-4">
+            <button @click="showfour = !showfour">
+                Toggle
+            </button>
+            <transition v-on:before-enter="beforeEnter" v-on:enter="enter" v-on:leave="leave" v-bind:css="false">
+                <p v-if="showfour">
+                    Demo
+                </p>
+            </transition>
+        </div>
+        <div id="list-complete-demo" class="demo">
+            <button v-on:click="shuffle">Shuffle</button>
+            <button v-on:click="add">Add</button>
+            <button v-on:click="remove">Remove</button>
+            <transition-group name="list-complete" tag="p">
+                <span v-for="item in items" v-bind:key="item" class="list-complete-item">
+                    {{ item }}
+                </span>
+            </transition-group>
+        </div>
+
+    </div>
+    <div id="staggered-list-demo">
+        <input v-model="query">
+        <transition-group name="staggered-fade" tag="ul" v-bind:css="false" v-on:before-enter="beforeEnter"
+            v-on:enter="enter" v-on:leave="leave">
+            <li v-for="(item, index) in computedList" v-bind:key="item.msg" v-bind:data-index="index">{{ item.msg }}
+            </li>
+        </transition-group>
+    </div>
+    <div id="dynamic-fade-demo" class="demo">
+        Fade In: <input type="range" v-model="fadeInDuration" min="0" v-bind:max="maxFadeDuration">
+        Fade Out: <input type="range" v-model="fadeOutDuration" min="0" v-bind:max="maxFadeDuration">
+        <transition v-bind:css="false" v-on:before-enter="beforeEnter" v-on:enter="enter" v-on:leave="leave">
+            <p v-if="show">hello</p>
+        </transition>
+        <button v-if="stop" v-on:click="stop = false; show = false">Start animating</button>
+        <button v-else v-on:click="stop = true">Stop it!</button>
+    </div>
+</body>
+<script>
+    new Vue({
+        el: '#demo',
+        data: {
+            show: true,
+            showOne: true,
+            showTwo: true,
+            showThree: true,
+            showfour: false,
+            items: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            nextNum: 10
+        },
+        methods: {
+            beforeEnter: function (el) {
+                el.style.opacity = 0
+                el.style.transformOrigin = 'left'
+            }, enter: function (el, done) {
+                Velocity(el, { opacity: 1, fontSize: '1.4em' }, { duration: 300 })
+                Velocity(el, { fontSize: '1em' }, { complete: done })
+            },
+            leave: function (el, done) {
+                Velocity(el, { translateX: '15px', rotateZ: '50deg' }, { duration: 600 })
+                Velocity(el, { rotateZ: '100deg' }, { loop: 2 })
+                Velocity(el, {
+                    rotateZ: '45deg',
+                    translateY: '30px',
+                    translateX: '30px',
+                    opacity: 0
+                }, { complete: done })
+            },
+            randomIndex: function () {
+                return Math.floor(Math.random() * this.items.length)
+            },
+            add: function () {
+                this.items.splice(this.randomIndex(), 0, this.nextNum++)
+            },
+            remove: function () {
+                this.items.splice(this.randomIndex(), 1)
+            },
+            shuffle: function () {
+                this.items = _.shuffle(this.items)
+            }
+        }
+
+    })
+
+    new Vue({
+        el: '#staggered-list-demo',
+        data: {
+            query: '',
+            list: [
+                { msg: 'Bruce Lee' },
+                { msg: 'Jackie Chan' },
+                { msg: 'Chuck Norris' },
+                { msg: 'Jet Li' },
+                { msg: 'Kung Fury' }
+            ]
+        },
+        computed: {
+            computedList: function () {
+                var vm = this
+                return this.list.filter(function (item) {
+                    return item.msg.toLowerCase().indexOf(vm.query.toLowerCase()) !== -1
+                })
+            }
+        },
+        methods: {
+            beforeEnter: function (el) {
+                el.style.opacity = 0
+                el.style.height = 0
+            },
+            enter: function (el, done) {
+                var delay = el.dataset.index * 150
+                setTimeout(function () {
+                    Velocity(
+                        el,
+                        { opacity: 1, height: '1.6em' },
+                        { complete: done }
+                    )
+                }, delay)
+            },
+            leave: function (el, done) {
+                var delay = el.dataset.index * 150
+                setTimeout(function () {
+                    Velocity(
+                        el,
+                        { opacity: 0, height: 0 },
+                        { complete: done }
+                    )
+                }, delay)
+            }
+        }
+    })
+
+
+    new Vue({
+        el: '#dynamic-fade-demo',
+        data: {
+            show: true,
+            fadeInDuration: 1000,
+            fadeOutDuration: 1000,
+            maxFadeDuration: 1500,
+            stop: true
+        },
+        mounted: function () {
+            this.show = false
+        },
+        methods: {
+            beforeEnter: function (el) {
+                el.style.opacity = 0
+            },
+            enter: function (el, done) {
+                var vm = this
+                Velocity(el,
+                    { opacity: 1 },
+                    {
+                        duration: this.fadeInDuration,
+                        complete: function () {
+                            done()
+                            if (!vm.stop) vm.show = false
+                        }
+                    }
+                )
+            },
+            leave: function (el, done) {
+                var vm = this
+                Velocity(el,
+                    { opacity: 0 },
+                    {
+                        duration: this.fadeOutDuration,
+                        complete: function () {
+                            done()
+                            vm.show = true
+                        }
+                    }
+                )
+            }
+        }
+    })
+</script>
+
+</html>
+<style>
+    .fade-enter-active,
+    .fade-leave-active {
+        transition: opacity .5s;
+    }
+
+    .fade-enter,
+    .fade-leave-to
+
+    /* .fade-leave-active below version 2.1.8 */
+        {
+        opacity: 0;
+    }
+
+    /* 可以设置不同的进入和离开动画 */
+    /* 设置持续时间和动画函数 */
+    .slide-fade-enter-active {
+        transition: all .3s ease;
+    }
+
+    .slide-fade-leave-active {
+        transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+    }
+
+    .slide-fade-enter,
+    .slide-fade-leave-to
+
+    /* .slide-fade-leave-active for below version 2.1.8 */
+        {
+        transform: translateX(10px);
+        opacity: 0;
+    }
+
+    .bounce-enter-active {
+        animation: bounce-in .5s;
+    }
+
+    .bounce-leave-active {
+        animation: bounce-in .5s reverse;
+    }
+
+    @keyframes bounce-in {
+        0% {
+            transform: scale(0);
+        }
+
+        50% {
+            transform: scale(1.5);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .list-complete-item {
+        transition: all 1s;
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    .list-complete-enter,
+    .list-complete-leave-to
+
+    /* .list-complete-leave-active for below version 2.1.8 */
+        {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    .list-complete-leave-active {
+        position: absolute;
+    }
+</style>

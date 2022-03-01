@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>插槽和监听子组件</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+</head>
+
+<body>
+    <div id="blog-post-demo">
+        <!-- <blog-post title="My journey with Vue"></blog-post>
+        <blog-post title="Blogging with Vue"></blog-post>
+        <blog-post title="Why Vue is so fun"></blog-post> -->
+        <div :style="{ fontSize: postFontSize + 'em' }">
+            <blog-post v-on:enlarge-text="postFontSize += 0.1" v-on:small-text="postFontSize -= 0.1"
+                v-on:get-text="postFontSize += $event" v-on:get-function-text="getFunctionText" v-for="post in posts"
+                v-bind:key="post.id" v-bind:title="post.title"></blog-post>
+        </div>
+        <input v-model="searchText">
+        <custom-input v-bind:value="searchText" v-on:input="searchText = $event"></custom-input>
+        <component-a></component-a>
+        <component-b></component-b>
+        <component-c></component-c>
+    </div>
+</body>
+
+</html>
+<script>
+    Vue.component('blog-post', {
+        props: ['title'],
+        template: `<div>
+            <h3>{{ title }}</h3>
+            <button v-on:click="$emit('enlarge-text')">
+                  Enlarge text</button>
+                  <button v-on:click="$emit('small-text')">
+                  small text</button>
+                  <button v-on:click="$emit('get-text',0.5)">
+                 传值 接收</button>
+                 <button v-on:click="$emit('get-function-text',0.5)">
+                函数的方式进行传值</button>
+                  </div > `
+
+
+    })
+    Vue.component('custom-input', {
+        props: ['value'],
+        template: `
+    <input
+      v-bind:value="value"
+      v-on:input="$emit('input', $event.target.value)"
+    >
+  `
+    })
+    // Vue.component('component-a', { template: `<div><h1>A组件</h1></div>` })
+    // Vue.component('component-b', { template: `<div><h1>B组件</h1></div>` })
+    // Vue.component('component-c', { template: `<div><h1>C组件</h1></div>` })
+    var ComponentA = { template: `<div><h1>A组件局部注册</h1></div>` }
+    var ComponentB = { template: `<div><h1>B组件局部注册</h1></div>` }
+    var ComponentC = { template: `<div><h1>C组件局部注册</h1></div>` }
+
+    new Vue({
+        el: '#blog-post-demo',
+        data: {
+            posts: [
+                { id: 1, title: 'My journey with Vue' },
+                { id: 2, title: 'Blogging with Vue' },
+                { id: 3, title: 'Why Vue is so fun' }
+            ],
+            postFontSize: 1,
+            searchText: "12323"
+        },
+        methods: {
+            getFunctionText: function (value) {
+                this.postFontSize -= value
+            }
+        },
+        components: {
+            'component-a': ComponentA,
+            'component-b': ComponentB,
+            'component-c': ComponentC,
+        }
+    })
+</script>
