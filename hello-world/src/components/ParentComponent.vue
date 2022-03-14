@@ -2,19 +2,23 @@
   <div>
     <h1>父组件</h1>
     {{ counts }}
+    {{ toCity }}
     <hr />
     <child-one :counts="counts" />
     <child-two @showCityName="updataCity" :sendData="toCity" />
+    <child-three @changeCity="changeCity" :toCity="toCity" />
   </div>
 </template>
 
 <script>
 import ChildOne from './ChildOne.vue'
 import ChildTwo from './ChildTwo.vue'
+import ChildThree from './ChildThree.vue'
 export default {
   components: {
     ChildOne,
-    ChildTwo
+    ChildTwo,
+    ChildThree
   },
   data () {
     return {
@@ -30,6 +34,10 @@ export default {
   methods: {
     updataCity (data) {
       this.toCity = data.cityname
+    },
+    changeCity (value) {
+      console.log(value)
+      this.toCity = value
     }
   }
 }
