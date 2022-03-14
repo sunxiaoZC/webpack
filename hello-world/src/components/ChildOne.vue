@@ -1,7 +1,7 @@
 <template>
   <div>
     <h3>子组件1</h3>
-    <p>{{ count }}</p>
+    <p>{{ counts }}</p>
     <button @click="setCount">中央事件总线</button>
   </div>
 </template>
@@ -9,7 +9,7 @@
 <script>
 export default {
   props: {
-    count: Number
+    counts: Number
   },
   data () {
     return {}
